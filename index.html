@@ -670,85 +670,165 @@ nav.scrolled::after {
 
 @media(max-width: 620px) {
   body { overflow-x: hidden; }
-  nav { flex-wrap: wrap; justify-content: space-between; padding: 16px 18px; }
-  .nav-logo { gap: 10px; }
+  nav { flex-wrap: wrap; justify-content: space-between; padding: 12px 14px; }
+  .nav-logo { gap: 8px; }
   .nav-logo-name { gap: 2px; }
+  .nav-logo-img { width: 32px; height: 32px; }
+  .nav-logo-h { font-size: 12px; }
   .nav-logo-sub { display: none; }
-  .nav-center { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--abyss); padding: 20px; gap: 18px; width: 100%; z-index: 999; }
+  .nav-center { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--abyss); padding: 14px; gap: 12px; width: 100%; z-index: 999; }
   .nav-center.active { display: flex; }
-  .nav-right { width: auto; justify-content: flex-end; gap: 10px; }
-  .nav-hamburger { display: block; }
-  .nav-btn { padding: 12px 22px; font-size: 9px; }
+  .nav-right { width: auto; justify-content: flex-end; gap: 8px; }
+  .nav-hamburger { display: block; font-size: 16px; }
+  .nav-btn { padding: 10px 18px; font-size: 8px; }
   #hero { min-height: 100vh; align-items: flex-start; }
-  .hero-content { padding: 90px 18px 40px; gap: 20px; }
-  .hero-eyebrow { margin-bottom: 18px; font-size: 8px; letter-spacing: .4em; }
-  .hero-h1 { margin-bottom: 24px; font-size: clamp(32px, 10vw, 48px); }
-  .hero-orn { margin-bottom: 24px; }
-  .hero-body { font-size: 14px; line-height: 1.8; }
-  .hero-ctas { width: 100%; justify-content: flex-start; }
-  .btn-gold-solid, .btn-outline-light { width: 100%; justify-content: center; padding: 14px 0; }
-  .hero-stats { flex-direction: column; gap: 14px; }
-  .hstat + .hstat { border-left: none; padding-left: 0; border-top: 1px solid rgba(200,165,90,0.1); padding-top: 18px; margin-top: 18px; }
-  .hero-scroll { left: 50%; transform: translateX(-50%); }
-  .marquee-wrap { padding: 16px 0; }
-  #collection { padding: 100px 18px; }
-  #heritage, #newsletter, footer { padding: 100px 18px 40px; }
-  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
-  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .sec-head { flex-direction: column; align-items: flex-start; gap: 18px; }
-  .feature-ghost { right: 6%; top: 40%; font-size: clamp(120px, 35vw, 200px); }
-  .feature-copy { max-width: 100%; }
+  .hero-content { padding: 70px 14px 30px; gap: 16px; }
+  .hero-eyebrow { margin-bottom: 12px; font-size: 7px; letter-spacing: .3em; }
+  .hero-h1 { margin-bottom: 16px; font-size: clamp(26px, 8vw, 40px); }
+  .hero-orn { margin-bottom: 16px; }
+  .hero-body { font-size: 12px; line-height: 1.6; margin-bottom: 20px; }
+  .hero-ctas { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 10px; }
+  .btn-gold-solid, .btn-outline-light { width: 100%; justify-content: center; padding: 12px 0; font-size: 9px; }
+  .hero-stats { flex-direction: column; gap: 10px; margin-top: 16px; padding-top: 16px; }
+  .hstat { flex: none; }
+  .hstat + .hstat { border-left: none; padding-left: 0; border-top: 1px solid rgba(200,165,90,0.1); padding-top: 12px; margin-top: 12px; }
+  .hero-scroll { bottom: 16px; }
+  .marquee-wrap { padding: 12px 0; }
+  .m-item { padding: 0 24px; gap: 24px; font-size: 7px; }
+  #collection { padding: 80px 14px; }
+  #heritage { padding: 80px 14px; grid-template-columns: 1fr; gap: 40px; }
+  .heritage-year { display: none; }
+  #newsletter, footer { padding: 80px 14px; }
+  .feature-copy { padding: 0 14px; max-width: 100%; }
+  #feature-band { min-height: 60vh; }
+  .col-grid { gap: 14px; padding: 0 4px; }
+  .products { gap: 12px; }
+  .product-card { padding: 12px; }
+  .product-card img { height: 140px; }
+  .product-card h2 { font-size: 14px; }
+  .sec-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .feature-ghost { display: none; }
   .exp-grid { grid-template-columns: 1fr; }
-  #newsletter { padding: 80px 18px 40px; }
-  .nl-form { gap: 14px; }
-  .nl-submit { width: 100%; padding: 14px 0; }
-  .orb-ring, .hero-canvas-fade, .hero-vline, .hero-radial-1, .hero-radial-2 { display: none; }
+  #newsletter { padding: 60px 14px; }
+  .nl-form { gap: 10px; flex-direction: column; }
+  .nl-input { width: 100%; font-size: 11px; }
+  .nl-submit { width: 100%; padding: 10px 0; }
+  .footer-grid { grid-template-columns: 1fr; gap: 16px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .orb-ring, .hero-canvas-fade, .hero-canvas-fade-top, .hero-canvas-fade-bot, .hero-vline, .hero-radial-1, .hero-radial-2, .hero-grid { display: none !important; }
+  .w-card { aspect-ratio: 1/1.2; }
+  .card-body { padding: 24px 16px 20px; }
+  .card-name { font-size: 16px; }
+  .card-price { font-size: 13px; }
 }
 
 @media(max-width: 480px) {
-  nav { padding: 14px 16px; }
-  .hero-content { padding: 70px 16px 30px; }
-  .hero-h1 { font-size: clamp(28px, 9vw, 40px); }
-  .hero-body { font-size: 13px; }
-  .marquee-wrap { padding: 12px 0; }
-  .m-item { padding: 0 32px; gap: 32px; font-size: 8px; }
-  #collection, #heritage, #newsletter, footer { padding: 80px 16px 30px; }
-  .sec-head { gap: 14px; }
-  .sec-title { font-size: clamp(28px, 8vw, 42px); }
-  .feature-ghost { font-size: clamp(100px, 30vw, 160px); }
-  .exp-grid { grid-template-columns: 1fr; }
-  .nl-form { flex-direction: column; }
-  .nl-input { width: 100%; }
-  .modal-content { padding: 20px; }
-  .modal-close { top: 10px; right: 10px; font-size: 24px; }
+  nav { padding: 10px 12px; }
+  .nav-logo { gap: 6px; }
+  .nav-logo-img { width: 28px; height: 28px; }
+  .nav-logo-h { font-size: 10px; }
+  .nav-btn { padding: 8px 14px; font-size: 7px; }
+  .hero-content { padding: 50px 12px 20px; gap: 12px; }
+  .hero-h1 { font-size: clamp(22px, 7vw, 32px); margin-bottom: 12px; }
+  .hero-body { font-size: 11px; line-height: 1.5; margin-bottom: 16px; }
+  .hero-eyebrow { font-size: 6px; margin-bottom: 10px; }
+  .btn-gold-solid, .btn-outline-light { padding: 10px 0; font-size: 8px; }
+  .hero-stats { gap: 8px; margin-top: 12px; }
+  .marquee-wrap { padding: 8px 0; }
+  .m-item { padding: 0 16px; gap: 16px; font-size: 6px; }
+  #collection { padding: 60px 12px; }
+  #heritage { padding: 60px 12px; }
+  #newsletter, footer { padding: 60px 12px; }
+  .sec-title { font-size: clamp(20px, 6vw, 32px); }
+  .nl-form { gap: 8px; }
+  .nl-input { font-size: 10px; }
+  .nl-submit { padding: 8px 0; font-size: 8px; }
+  .products { gap: 8px; }
+  .product-card { padding: 8px; }
+  .product-card img { height: 100px; }
+  .product-card h2 { font-size: 12px; margin-bottom: 4px; }
+  .card-body { padding: 16px 12px 14px; }
+  .card-name { font-size: 13px; }
+  .card-price { font-size: 11px; }
+  .card-sub { font-size: 11px; }
+  .sec-eyebrow { font-size: 7px; }
+  .feature-copy { padding: 0 12px; }
+  #feature-band { min-height: 50vh; }
+  .feature-h { font-size: clamp(24px, 5vw, 36px); margin-bottom: 16px; }
+  .feature-body { font-size: 11px; }
+  .footer-grid { gap: 12px; }
 }
 
 @media(max-width: 375px) {
-  nav { padding: 12px 14px; }
-  .nav-logo-img { width: 32px; height: 32px; }
-  .nav-logo-h { font-size: 11px; }
-  .nav-logo-sub { font-size: 6px; }
-  .hero-content { padding: 60px 14px 25px; gap: 16px; }
-  .hero-eyebrow { font-size: 7px; margin-bottom: 14px; }
-  .hero-h1 { font-size: clamp(24px, 8vw, 36px); margin-bottom: 18px; }
-  .hero-orn { margin-bottom: 18px; }
-  .hero-body { font-size: 12px; line-height: 1.7; }
-  .btn-gold-solid, .btn-outline-light { padding: 12px 0; }
-  .hero-stats { gap: 10px; }
-  .hstat { padding-top: 14px; }
-  .marquee-wrap { padding: 10px 0; }
-  .m-item { padding: 0 24px; gap: 24px; font-size: 7px; }
-  #collection, #heritage, #newsletter, footer { padding: 60px 14px 20px; }
-  .col-grid { grid-template-columns: 1fr; }
-  .sec-head { gap: 12px; }
-  .sec-title { font-size: clamp(24px, 7vw, 36px); }
-  .feature-ghost { font-size: clamp(80px, 25vw, 120px); }
-  .exp-grid { grid-template-columns: 1fr; gap: 16px; }
-  .nl-form { gap: 10px; }
-  .nl-submit { padding: 12px 0; }
-  .footer-grid { gap: 20px; }
-  .modal-content { padding: 15px; max-width: 95%; }
-  .modal-grid { grid-template-columns: 1fr; gap: 15px; }
+  nav { padding: 8px 10px; }
+  .nav-logo-img { width: 24px; height: 24px; }
+  .nav-logo-h { font-size: 9px; }
+  .nav-btn { padding: 6px 12px; font-size: 6px; }
+  .hero-content { padding: 40px 10px 15px; gap: 10px; }
+  .hero-eyebrow { font-size: 5px; margin-bottom: 8px; }
+  .hero-h1 { font-size: clamp(18px, 6vw, 28px); margin-bottom: 10px; }
+  .hero-orn { margin-bottom: 10px; }
+  .hero-body { font-size: 10px; line-height: 1.4; }
+  .btn-gold-solid, .btn-outline-light { padding: 8px 0; font-size: 7px; }
+  .hero-stats { gap: 6px; margin-top: 10px; padding-top: 10px; }
+  .hstat { padding-top: 10px; }
+  .marquee-wrap { padding: 6px 0; }
+  .m-item { padding: 0 12px; gap: 12px; font-size: 5px; }
+  #collection { padding: 50px 10px; }
+  #heritage { padding: 50px 10px; gap: 24px; }
+  #newsletter, footer { padding: 50px 10px; }
+  .sec-eyebrow { font-size: 6px; margin-bottom: 10px; }
+  .sec-title { font-size: clamp(16px, 5vw, 24px); }
+  .feature-copy { padding: 0 10px; }
+  .feature-h { font-size: clamp(18px, 4vw, 28px); margin-bottom: 12px; }
+  .feature-body { font-size: 10px; margin-bottom: 20px; }
+  .feature-num { margin-bottom: 12px; font-size: 7px; }
+  .exp-grid { gap: 0; padding: 0; }
+  .exp-cell { padding: 32px 16px; }
+  .exp-icon-wrap { width: 40px; height: 40px; margin-bottom: 16px; }
+  .exp-h { font-size: 12px; }
+  .exp-body { font-size: 9px; }
+  .nl-form { gap: 8px; }
+  .nl-input { font-size: 9px; padding: 8px; }
+  .nl-submit { padding: 8px 0; font-size: 7px; }
+  .col-grid { gap: 8px; padding: 0 2px; }
+  .products { gap: 6px; }
+  .product-card { padding: 6px; }
+  .product-card img { height: 80px; margin-bottom: 8px; }
+  .product-card h2 { font-size: 11px; margin-bottom: 3px; }
+  .product-card p { font-size: 12px; }
+  .card-body { padding: 12px 8px 10px; }
+  .card-ref { font-size: 7px; margin-bottom: 6px; }
+  .card-name { font-size: 12px; margin-bottom: 4px; }
+  .card-sub { font-size: 10px; }
+  .card-price { font-size: 10px; }
+  .card-footer { padding-top: 8px; }
+  .footer-grid { gap: 12px; }
+  .footer-text h3 { font-size: 11px; }
+  .footer-text p { font-size: 9px; }
+  .modal-content { padding: 12px; max-width: 95%; }
+  .modal-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+@media(max-width: 320px) {
+  nav { padding: 6px 8px; }
+  .nav-logo-img { width: 20px; height: 20px; }
+  .nav-logo-h { font-size: 8px; }
+  .nav-btn { display: none; }
+  .hero-content { padding: 30px 8px 12px; }
+  .hero-h1 { font-size: clamp(16px, 5vw, 22px); }
+  .hero-body { font-size: 9px; }
+  .btn-gold-solid, .btn-outline-light { font-size: 6px; padding: 6px 0; }
+  .marquee-wrap { display: none; }
+  #collection { padding: 40px 8px; }
+  .sec-title { font-size: clamp(14px, 4vw, 20px); }
+  .nl-input { font-size: 8px; padding: 6px; }
+  .nl-submit { font-size: 6px; }
+  .products { gap: 4px; }
+  .product-card { padding: 4px; }
+  .card-name { font-size: 10px; }
+  #heritage { padding: 40px 8px; }
+  #newsletter, footer { padding: 40px 8px; }
 }
 
 @keyframes slideInLeft {
@@ -819,18 +899,18 @@ nav.scrolled::after {
 /* Collection grid */
 .col-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   grid-template-rows: auto;
-  gap: 40px;
-  padding: 0 12px;
+  gap: 24px;
+  padding: 0 8px;
   align-items: start;
 }
 
 /* Products container */
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
   width: 100%;
 }
 
