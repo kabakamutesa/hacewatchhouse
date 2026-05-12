@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACE — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Raleway:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070e;--surface:#0a0c18;--surface2:#0f1222;
+  --border:rgba(200,165,90,0.1);--border2:rgba(200,165,90,0.2);
+  --gold:#c8a55a;--gold-lt:#dfc078;--gold-dk:#7a6030;
+  --white:#f8f4ec;--cream:#d8cdb0;--muted:rgba(216,205,176,0.45);
+  --red:#e05555;--green:#4dba7f;
+  --f-display:'Cinzel',serif;--f-sans:'Raleway',sans-serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--f-sans);font-weight:300;min-height:100vh}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#login-screen.hidden{display:none}
+.login-box{width:100%;max-width:400px;padding:52px 44px;border:1px solid var(--border);background:var(--surface)}
+.login-logo{font-family:var(--f-display);font-size:28px;letter-spacing:.3em;color:var(--gold);text-align:center;margin-bottom:4px}
+.login-sub{font-size:9px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-dk);text-align:center;margin-bottom:40px}
+.login-label{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
+.login-input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--white);padding:14px 16px;font-family:var(--f-sans);font-size:13px;letter-spacing:.06em;outline:none;transition:border-color .3s;margin-bottom:20px}
+.login-input:focus{border-color:var(--gold)}
+.login-btn{width:100%;background:var(--gold);color:var(--bg);border:none;padding:15px;font-family:var(--f-sans);font-size:10px;letter-spacing:.3em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--gold-lt)}
+.login-error{color:var(--red);font-size:11px;letter-spacing:.08em;text-align:center;margin-top:12px;display:none}
+
+/* APP LAYOUT */
+#app{display:none}
+#app.visible{display:flex}
+#sidebar{width:220px;min-height:100vh;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:32px 28px 24px;border-bottom:1px solid var(--border)}
+.sb-logo-h{font-family:var(--f-display);font-size:16px;letter-spacing:.25em;color:var(--gold)}
+.sb-logo-s{font-size:7.5px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold-dk);margin-top:2px}
+.sb-nav{padding:20px 0;flex:1}
+.sb-item{display:flex;align-items:center;gap:12px;padding:12px 28px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:color .2s,background .2s,border-color .2s}
+.sb-item:hover{color:var(--cream);background:rgba(200,165,90,0.04)}
+.sb-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(200,165,90,0.06)}
+.sb-item svg{width:15px;height:15px;flex-shrink:0;opacity:.7}
+.sb-footer{padding:20px 28px;border-top:1px solid var(--border)}
+.sb-logout{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;transition:color .2s;background:none;border:none;font-family:var(--f-sans)}
+.sb-logout:hover{color:var(--red)}
+.sb-logout svg{width:14px;height:14px}
+#main{flex:1;overflow-y:auto;padding:40px 48px}
+
+/* TOP BAR */
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px}
+.page-title{font-family:var(--f-display);font-size:22px;letter-spacing:.08em;color:var(--white)}
+.page-sub{font-size:11px;letter-spacing:.1em;color:var(--muted);margin-top:3px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:40px}
+.stat-box{background:var(--surface);padding:24px 20px;transition:background .3s}
+.stat-box:hover{background:var(--surface2)}
+.stat-n{font-family:var(--f-display);font-size:32px;color:var(--gold-lt);letter-spacing:.04em;margin-bottom:4px;line-height:1}
+.stat-l{font-size:8.5px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-sans);font-size:9px;letter-spacing:.25em;text-transform:uppercase;font-weight:500;padding:11px 24px;border:none;cursor:pointer;transition:background .2s,transform .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-lt)}
+.btn-outline{background:transparent;color:var(--cream);border:1px solid var(--border2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(224,85,85,0.3)}
+.btn-danger:hover{background:rgba(224,85,85,0.1);border-color:var(--red)}
+.btn-sm{padding:8px 16px;font-size:8px}
+.btn svg{width:13px;height:13px}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);overflow:hidden}
+.table-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border)}
+.table-title{font-family:var(--f-display);font-size:13px;letter-spacing:.12em;color:var(--cream)}
+.search-input{background:var(--bg);border:1px solid var(--border);color:var(--white);padding:9px 14px;font-family:var(--f-sans);font-size:12px;letter-spacing:.05em;outline:none;transition:border-color .3s;width:220px}
+.search-input:focus{border-color:var(--gold)}
+.search-input::placeholder{color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+thead th{padding:12px 18px;font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dk);text-align:left;font-weight:500}
+tbody tr{border-bottom:1px solid rgba(200,165,90,0.05);transition:background .2s}
+tbody tr:hover{background:rgba(200,165,90,0.03)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:14px 18px;font-size:12px;color:var(--cream);letter-spacing:.04em;vertical-align:middle}
+.product-name-cell{font-family:var(--f-display);font-size:13px;color:var(--white);letter-spacing:.05em}
+.product-brand-cell{font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.price-cell{font-family:var(--f-display);font-size:13px;color:var(--gold-lt);letter-spacing:.04em}
+.badge-cell{display:inline-block;font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;padding:3px 10px;background:rgba(200,165,90,0.12);color:var(--gold)}
+.stock-cell{display:flex;align-items:center;gap:8px}
+.stock-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.stock-in{background:var(--green)}.stock-low{background:var(--gold)}.stock-out{background:var(--red)}
+.actions-cell{display:flex;gap:8px;align-items:center}
+.loading-row td{text-align:center;padding:48px;color:var(--muted);font-size:12px;letter-spacing:.1em}
+.spinner{width:20px;height:20px;border:1.5px solid var(--border2);border-top-color:var(--gold);border-radius:50%;display:inline-block;animation:spin .7s linear infinite;margin-right:10px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:80px 40px}
+.empty-icon{font-size:40px;margin-bottom:16px;opacity:.4}
+.empty-text{font-size:13px;letter-spacing:.08em;color:var(--muted)}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(5,7,14,0.88);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:24px}
+#modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);width:100%;max-width:680px;max-height:90vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:24px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-title{font-family:var(--f-display);font-size:16px;letter-spacing:.1em;color:var(--white)}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;transition:color .2s;font-size:20px;line-height:1}
+.modal-close:hover{color:var(--red)}
+.modal-body{padding:28px}
+.modal-footer{padding:20px 28px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:12px;position:sticky;bottom:0;background:var(--surface)}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.span2{grid-column:span 2}
+.field-label{font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-dk);font-weight:500}
+.field-input,.field-select,.field-textarea{background:var(--bg);border:1px solid var(--border);color:var(--white);padding:11px 14px;font-family:var(--f-sans);font-size:12px;letter-spacing:.05em;outline:none;transition:border-color .3s;width:100%}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--gold)}
+.field-input::placeholder,.field-textarea::placeholder{color:var(--muted)}
+.field-select{appearance:none;cursor:pointer}
+.field-select option{background:var(--surface)}
+.field-textarea{resize:vertical;min-height:80px}
+.form-divider{grid-column:span 2;height:1px;background:var(--border);margin:6px 0}
+.form-section-label{grid-column:span 2;font-size:8px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-dk);padding-top:4px}
+
+/* TOAST */
+#toast{position:fixed;bottom:32px;right:32px;z-index:2000;display:none;align-items:center;gap:12px;padding:14px 20px;font-size:12px;letter-spacing:.07em;color:var(--white);min-width:280px;animation:toastIn .35s var(--ease)}
+#toast.show{display:flex}
+#toast.success{background:rgba(77,186,127,0.15);border:1px solid rgba(77,186,127,0.3)}
+#toast.error{background:rgba(224,85,85,0.15);border:1px solid rgba(224,85,85,0.3)}
+.toast-icon{width:18px;height:18px;flex-shrink:0}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* CONFIRM */
+#confirm-overlay{position:fixed;inset:0;z-index:600;background:rgba(5,7,14,0.92);display:none;align-items:center;justify-content:center}
+#confirm-overlay.open{display:flex}
+.confirm-box{background:var(--surface);border:1px solid rgba(224,85,85,0.3);padding:36px 40px;max-width:400px;width:100%;text-align:center}
+.confirm-icon{font-size:32px;margin-bottom:16px}
+.confirm-title{font-family:var(--f-display);font-size:18px;letter-spacing:.08em;color:var(--white);margin-bottom:10px}
+.confirm-body{font-size:12px;letter-spacing:.06em;color:var(--muted);margin-bottom:28px;line-height:1.7}
+.confirm-actions{display:flex;gap:12px;justify-content:center}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">HACE</div>
+    <div class="login-sub">Admin Panel · Watch House</div>
+    <label class="login-label">Password</label>
+    <input type="password" class="login-input" id="login-input" placeholder="Enter admin password">
+    <button class="login-btn" id="login-btn">Access Dashboard</button>
+    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<div id="app">
+  <aside id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-h">HACE</div>
+      <div class="sb-logo-s">Admin Dashboard</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-item active" data-page="products">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Products
+      </div>
+      <div class="sb-item" data-page="orders">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Orders
+      </div>
+      <div class="sb-item" data-page="enquiries">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Enquiries
+      </div>
+      <div class="sb-item" data-page="subscribers">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Subscribers
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <button class="sb-logout" id="logout-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- PRODUCTS -->
+    <div id="page-products">
+      <div class="top-bar">
+        <div>
+          <div class="page-title">Products</div>
+          <div class="page-sub">Manage your watch collection</div>
+        </div>
+        <button class="btn btn-gold" id="add-product-btn">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round"/></svg>
+          Add Watch
+        </button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-n" id="stat-total">—</div><div class="stat-l">Total Products</div></div>
+        <div class="stat-box"><div class="stat-n" id="stat-instock">—</div><div class="stat-l">In Stock</div></div>
+        <div class="stat-box"><div class="stat-n" id="stat-featured">—</div><div class="stat-l">Featured</div></div>
+        <div class="stat-box"><div class="stat-n" id="stat-value">—</div><div class="stat-l">Total Value (KES M)</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">All Watches</div>
+          <input type="text" class="search-input" id="search-input" placeholder="Search by name or brand...">
+        </div>
+        <table>
+          <thead><tr><th>Watch</th><th>Ref</th><th>Price</th><th>Stock</th><th>Badge</th><th>Actions</th></tr></thead>
+          <tbody id="products-tbody"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="page-orders" style="display:none">
+      <div class="top-bar"><div><div class="page-title">Orders</div><div class="page-sub">Track purchases and payments</div></div></div>
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">All Orders</div></div>
+        <table>
+          <thead><tr><th>Customer</th><th>Product</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="orders-tbody"><tr class="loading-row"><td colspan="7"><span class="spinner"></span>Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ENQUIRIES -->
+    <div id="page-enquiries" style="display:none">
+      <div class="top-bar"><div><div class="page-title">Enquiries</div><div class="page-sub">WhatsApp leads and messages</div></div></div>
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">All Enquiries</div></div>
+        <table>
+          <thead><tr><th>Name</th><th>Phone</th><th>Product</th><th>Message</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="enquiries-tbody"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUBSCRIBERS -->
+    <div id="page-subscribers" style="display:none">
+      <div class="top-bar"><div><div class="page-title">Subscribers</div><div class="page-sub">Newsletter and private access list</div></div></div>
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">All Subscribers</div></div>
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+          <tbody id="subscribers-tbody"><tr class="loading-row"><td colspan="4"><span class="spinner"></span>Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Add New Watch</div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section-label">Basic Information</div>
+        <div class="form-divider"></div>
+        <div class="field"><label class="field-label">Watch Name *</label><input type="text" class="field-input" id="f-name" placeholder="e.g. Submariner Noir"></div>
+        <div class="field"><label class="field-label">Brand *</label><input type="text" class="field-input" id="f-brand" placeholder="e.g. Rolex"></div>
+        <div class="field"><label class="field-label">Reference Number</label><input type="text" class="field-input" id="f-ref" placeholder="e.g. HW-2024-09"></div>
+        <div class="field"><label class="field-label">Slug (URL) *</label><input type="text" class="field-input" id="f-slug" placeholder="e.g. submariner-noir"></div>
+        <div class="field"><label class="field-label">Price (KES) *</label><input type="number" class="field-input" id="f-price" placeholder="e.g. 2850000"></div>
+        <div class="field"><label class="field-label">Stock Quantity *</label><input type="number" class="field-input" id="f-stock" value="1"></div>
+        <div class="field"><label class="field-label">Badge</label>
+          <select class="field-select" id="f-badge">
+            <option value="">None</option>
+            <option value="New Arrival">New Arrival</option>
+            <option value="Editor's Pick">Editor's Pick</option>
+            <option value="Limited">Limited</option>
+            <option value="Sale">Sale</option>
+            <option value="Rare">Rare</option>
+          </select>
+        </div>
+        <div class="field"><label class="field-label">Featured on Homepage</label>
+          <select class="field-select" id="f-featured">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+        <div class="field span2"><label class="field-label">Description *</label><textarea class="field-textarea" id="f-description" placeholder="Describe this watch..."></textarea></div>
+        <div class="form-section-label" style="margin-top:8px">Specifications</div>
+        <div class="form-divider"></div>
+        <div class="field"><label class="field-label">Movement</label><input type="text" class="field-input" id="f-movement" placeholder="e.g. Automatic Cal. 3235"></div>
+        <div class="field"><label class="field-label">Case Size</label><input type="text" class="field-input" id="f-case" placeholder="e.g. 41mm Stainless Steel"></div>
+        <div class="field"><label class="field-label">Water Resistance</label><input type="text" class="field-input" id="f-water" placeholder="e.g. 100m / 330ft"></div>
+        <div class="field"><label class="field-label">Power Reserve</label><input type="text" class="field-input" id="f-power" placeholder="e.g. 70 Hours"></div>
+        <div class="field"><label class="field-label">Crystal</label><input type="text" class="field-input" id="f-crystal" placeholder="e.g. Sapphire Crystal"></div>
+        <div class="field"><label class="field-label">Complications</label><input type="text" class="field-input" id="f-complications" placeholder="e.g. GMT, Moon Phase"></div>
+        <div class="field span2">
+          <label class="field-label">Watch Photos</label>
+          <input type="file" id="f-images" accept="image/*" multiple
+            style="background:var(--bg);border:1px solid var(--border);color:var(--white);padding:10px 14px;width:100%;font-family:var(--f-sans);font-size:12px;cursor:pointer">
+          <div style="font-size:10px;color:var(--gold-dk);margin-top:6px;letter-spacing:.06em">Upload up to 5 photos. First photo is the main display image.</div>
+          <div id="current-images" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+      <button class="btn btn-gold" id="modal-save">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Save Watch
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">Delete Watch?</div>
+    <div class="confirm-body" id="confirm-body">This will permanently remove this watch from your store.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-outline" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <svg class="toast-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" id="toast-icon"></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ══ CONFIG — REPLACE THESE ════════════════════════ */
+const SUPABASE_URL   ='https://laysnjulmwuhvuvspbuz.supabase.co'
+const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxheXNuanVsbXd1aHZ1dnNwYnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDI4NDcsImV4cCI6MjA5MzAxODg0N30.B_Xwa1H2Br30QrPEDHfMouL_SXmzlPebIDgjA7KQHCw'
+const ADMIN_PASSWORD = 'hacedb2026admin'  // ← change this
+
+/* ══ INIT ══════════════════════════════════════════ */
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+let allProducts = [], editingId = null, deleteId = null
+
+/* ══ LOGIN ═════════════════════════════════════════ */
+if (sessionStorage.getItem('hace_admin') === 'true') showApp()
+
+document.getElementById('login-btn').addEventListener('click', doLogin)
+document.getElementById('login-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin() })
+
+function doLogin() {
+  const pw = document.getElementById('login-input').value
+  if (pw === ADMIN_PASSWORD) {
+    sessionStorage.setItem('hace_admin', 'true')
+    showApp()
+  } else {
+    document.getElementById('login-error').style.display = 'block'
+    document.getElementById('login-input').value = ''
+  }
+}
+
+function showApp() {
+  document.getElementById('login-screen').classList.add('hidden')
+  document.getElementById('app').classList.add('visible')
+  loadProducts(); loadOrders(); loadEnquiries(); loadSubscribers()
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('hace_admin'); location.reload()
+})
+
+/* ══ SIDEBAR ═══════════════════════════════════════ */
+document.querySelectorAll('.sb-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'))
+    item.classList.add('active')
+    document.querySelectorAll('#main > div').forEach(p => p.style.display = 'none')
+    document.getElementById(`page-${item.dataset.page}`).style.display = 'block'
+  })
+})
+
+/* ══ TOAST ═════════════════════════════════════════ */
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast')
+  const icon = document.getElementById('toast-icon')
+  document.getElementById('toast-msg').textContent = msg
+  t.className = `show ${type}`
+  icon.innerHTML = type==='success'
+    ? '<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>'
+    : '<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>'
+  setTimeout(() => t.className = '', 3500)
+}
+
+/* ══ PRODUCTS ══════════════════════════════════════ */
+async function loadProducts() {
+  const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false })
+  if (error) { showToast('Failed to load products', 'error'); return }
+  allProducts = data
+  renderProducts(data)
+  const instock  = data.filter(p => p.stock > 0).length
+  const featured = data.filter(p => p.featured).length
+  const value    = data.reduce((s,p) => s + (p.price_kes * p.stock), 0)
+  document.getElementById('stat-total').textContent    = data.length
+  document.getElementById('stat-instock').textContent  = instock
+  document.getElementById('stat-featured').textContent = featured
+  document.getElementById('stat-value').textContent    = (value/1000000).toFixed(1)+'M'
+}
+
+function renderProducts(data) {
+  const tbody = document.getElementById('products-tbody')
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⌚</div><div class="empty-text">No products yet — add your first watch</div></div></td></tr>`
+    return
+  }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><div class="product-name-cell">${p.name}</div><div class="product-brand-cell">${p.brand}</div></td>
+      <td style="font-size:11px;color:var(--muted)">${p.ref_number||'—'}</td>
+      <td class="price-cell">KES ${Number(p.price_kes).toLocaleString('en-KE')}</td>
+      <td><div class="stock-cell">
+        <div class="stock-dot ${p.stock>1?'stock-in':p.stock===1?'stock-low':'stock-out'}"></div>
+        ${p.stock} ${p.stock===0?'(Sold Out)':p.stock===1?'(Last one)':''}
+      </div></td>
+      <td>${p.badge?`<span class="badge-cell">${p.badge}</span>`:'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+      <td><div class="actions-cell">
+        <button class="btn btn-outline btn-sm" onclick="openEdit('${p.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="openDelete('${p.id}','${p.name.replace(/'/g,"\\'")}')">Delete</button>
+      </div></td>
+    </tr>`).join('')
+}
+
+document.getElementById('search-input').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase()
+  renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)))
+})
+
+/* ══ ADD / EDIT ════════════════════════════════════ */
+document.getElementById('add-product-btn').addEventListener('click', () => {
+  editingId = null
+  document.getElementById('modal-title').textContent = 'Add New Watch'
+  clearForm(); openModal()
+})
+
+document.getElementById('f-name').addEventListener('input', e => {
+  if (!editingId) document.getElementById('f-slug').value = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+})
+
+async function uploadImages(productId) {
+  const files = document.getElementById('f-images').files
+  if (!files.length) return []
+
+  const urls = []
+  for (const file of Array.from(files).slice(0, 5)) {
+    const ext  = file.name.split('.').pop()
+    const path = `${productId}/${Date.now()}.${ext}`
+    const { error } = await db.storage.from('watch-images').upload(path, file)
+    if (!error) {
+      const { data } = db.storage.from('watch-images').getPublicUrl(path)
+      urls.push(data.publicUrl)
+    }
+  }
+  return urls
+}
+
+function openEdit(id) {
+  const p = allProducts.find(x => x.id === id)
+  if (!p) return
+  editingId = id
+  document.getElementById('modal-title').textContent = 'Edit Watch'
+  document.getElementById('f-name').value          = p.name||''
+  document.getElementById('f-brand').value         = p.brand||''
+  document.getElementById('f-ref').value           = p.ref_number||''
+  document.getElementById('f-slug').value          = p.slug||''
+  document.getElementById('f-price').value         = p.price_kes||''
+  document.getElementById('f-stock').value         = p.stock??1
+  document.getElementById('f-badge').value         = p.badge||''
+  document.getElementById('f-featured').value      = p.featured?'true':'false'
+  document.getElementById('f-description').value   = p.description||''
+  document.getElementById('f-movement').value      = p.movement||''
+  document.getElementById('f-case').value          = p.case_size||''
+  document.getElementById('f-water').value         = p.water_resist||''
+  document.getElementById('f-power').value         = p.power_reserve||''
+  document.getElementById('f-crystal').value       = p.crystal||''
+  document.getElementById('f-complications').value = p.complications||''
+  openModal()
+}
+
+document.getElementById('modal-save').addEventListener('click', async () => {
+  const name  = document.getElementById('f-name').value.trim()
+  const brand = document.getElementById('f-brand').value.trim()
+  const slug  = document.getElementById('f-slug').value.trim()
+  const price = document.getElementById('f-price').value
+  if (!name||!brand||!slug||!price) { showToast('Fill in all required fields','error'); return }
+
+  const payload = {
+    name, brand, slug,
+    ref_number:    document.getElementById('f-ref').value.trim(),
+    price_kes:     Number(price),
+    stock:         Number(document.getElementById('f-stock').value)||1,
+    badge:         document.getElementById('f-badge').value,
+    featured:      document.getElementById('f-featured').value==='true',
+    description:   document.getElementById('f-description').value.trim(),
+    movement:      document.getElementById('f-movement').value.trim(),
+    case_size:     document.getElementById('f-case').value.trim(),
+    water_resist:  document.getElementById('f-water').value.trim(),
+    power_reserve: document.getElementById('f-power').value.trim(),
+    crystal:       document.getElementById('f-crystal').value.trim(),
+    complications: document.getElementById('f-complications').value.trim(),
+  }
+
+  const btn = document.getElementById('modal-save')
+  btn.textContent = 'Saving...'; btn.disabled = true
+
+  let savedId = editingId
+
+  if (!editingId) {
+    const { data: inserted, error: insertErr } = await db
+      .from('products').insert(payload).select().single()
+    if (insertErr) { showToast(insertErr.message, 'error'); btn.disabled = false; btn.textContent = 'Save Watch'; return }
+    savedId = inserted.id
+  } else {
+    const { error: updateErr } = await db.from('products').update(payload).eq('id', editingId)
+    if (updateErr) { showToast(updateErr.message, 'error'); btn.disabled = false; btn.textContent = 'Save Watch'; return }
+  }
+
+  const newImages = await uploadImages(savedId)
+  if (newImages.length > 0) {
+    const existing = allProducts.find(p => p.id === savedId)?.images || []
+    await db.from('products').update({ images: [...existing, ...newImages] }).eq('id', savedId)
+  }
+
+  btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Watch'
+  btn.disabled = false
+
+  showToast(editingId ? 'Watch updated ✓' : 'Watch added — live on website ✓')
+  closeModal(); loadProducts()
+})
+
+/* ══ DELETE ════════════════════════════════════════ */
+function openDelete(id, name) {
+  deleteId = id
+  document.getElementById('confirm-body').textContent = `"${name}" will be permanently removed from your store and website.`
+  document.getElementById('confirm-overlay').classList.add('open')
+}
+document.getElementById('confirm-cancel').addEventListener('click', () => {
+  document.getElementById('confirm-overlay').classList.remove('open'); deleteId = null
+})
+document.getElementById('confirm-delete').addEventListener('click', async () => {
+  if (!deleteId) return
+  const { error } = await db.from('products').delete().eq('id', deleteId)
+  document.getElementById('confirm-overlay').classList.remove('open')
+  if (error) showToast('Delete failed: '+error.message, 'error')
+  else { showToast('Watch deleted ✓'); loadProducts() }
+  deleteId = null
+})
+
+/* ══ MODAL HELPERS ═════════════════════════════════ */
+function openModal()  { document.getElementById('modal-overlay').classList.add('open') }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open') }
+function clearForm()  {
+  ['f-name','f-brand','f-ref','f-slug','f-price','f-description','f-movement','f-case','f-water','f-power','f-crystal','f-complications']
+    .forEach(id => document.getElementById(id).value='')
+  document.getElementById('f-stock').value='1'
+  document.getElementById('f-badge').value=''
+  document.getElementById('f-featured').value='false'
+}
+document.getElementById('modal-close').addEventListener('click', closeModal)
+document.getElementById('modal-cancel').addEventListener('click', closeModal)
+document.getElementById('modal-overlay').addEventListener('click', e => { if(e.target===document.getElementById('modal-overlay')) closeModal() })
+
+/* ══ ORDERS ════════════════════════════════════════ */
+async function loadOrders() {
+  const { data } = await db.from('orders').select('*').order('created_at', { ascending: false })
+  const tbody = document.getElementById('orders-tbody')
+  if (!data||!data.length) { tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders yet</div></div></td></tr>`; return }
+  tbody.innerHTML = data.map(o => `
+    <tr>
+      <td><div style="font-weight:500">${o.customer_name}</div><div style="font-size:11px;color:var(--muted)">${o.customer_phone||o.customer_email}</div></td>
+      <td style="font-size:12px">${o.product_name||'—'}</td>
+      <td class="price-cell" style="font-size:13px">KES ${Number(o.amount_kes).toLocaleString('en-KE')}</td>
+      <td style="font-size:11px;text-transform:capitalize">${o.payment_method}</td>
+      <td><span style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;padding:3px 10px;background:${o.status==='paid'?'rgba(77,186,127,0.12)':'rgba(200,165,90,0.12)'};color:${o.status==='paid'?'var(--green)':'var(--gold)'}">${o.status}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${new Date(o.created_at).toLocaleDateString('en-KE')}</td>
+      <td>${o.status==='pending'?`<button class="btn btn-outline btn-sm" onclick="markPaid('${o.id}')">Mark Paid</button>`:'—'}</td>
+    </tr>`).join('')
+}
+
+async function markPaid(id) {
+  const mpesa = prompt('Enter M-Pesa confirmation code:')
+  if (!mpesa) return
+  const { error } = await db.from('orders').update({ status:'paid', mpesa_code:mpesa }).eq('id', id)
+  if (error) showToast('Update failed','error')
+  else { showToast('Order marked as paid ✓'); loadOrders() }
+}
+
+/* ══ ENQUIRIES ═════════════════════════════════════ */
+async function loadEnquiries() {
+  const { data } = await db.from('enquiries').select('*').order('created_at', { ascending: false })
+  const tbody = document.getElementById('enquiries-tbody')
+  if (!data||!data.length) { tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">No enquiries yet</div></div></td></tr>`; return }
+  tbody.innerHTML = data.map(e => `
+    <tr>
+      <td style="font-weight:500">${e.name}</td>
+      <td><a href="https://wa.me/${(e.phone||'').replace(/\D/g,'')}" target="_blank" style="color:var(--gold);font-size:12px">${e.phone||'—'}</a></td>
+      <td style="font-size:12px">${e.product_name||'—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.message||'—'}</td>
+      <td><span style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;padding:3px 10px;background:rgba(200,165,90,0.1);color:var(--gold)">${e.status}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${new Date(e.created_at).toLocaleDateString('en-KE')}</td>
+    </tr>`).join('')
+}
+
+/* ══ SUBSCRIBERS ═══════════════════════════════════ */
+async function loadSubscribers() {
+  const { data } = await db.from('subscribers').select('*').order('created_at', { ascending: false })
+  const tbody = document.getElementById('subscribers-tbody')
+  if (!data||!data.length) { tbody.innerHTML=`<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">✉️</div><div class="empty-text">No subscribers yet</div></div></td></tr>`; return }
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td style="font-weight:500">${s.name||'—'}</td>
+      <td style="font-size:12px">${s.email}</td>
+      <td style="font-size:12px">${s.phone||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString('en-KE')}</td>
+    </tr>`).join('')
+}
+</script>
+</body>
+</html>

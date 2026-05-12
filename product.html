@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACE Watch House</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf8f4;--white:#ffffff;--ink:#1a1714;--mid:#6b6560;
+  --muted:#9c9590;--border:rgba(28,24,20,0.08);
+  --gold:#b8942e;--gold-lt:#d4ae4a;--gold-bg:rgba(184,148,46,0.06);
+  --f-display:'Cinzel',serif;--f-serif:'Cormorant Garamond',serif;
+  --f-sans:'Raleway',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-sans);font-weight:300}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(24px,5vw,80px);
+  background:rgba(250,248,244,0.94);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-back{
+  display:flex;align-items:center;gap:10px;
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mid);text-decoration:none;
+  transition:color .25s;
+}
+.nav-back:hover{color:var(--gold)}
+.nav-back svg{width:16px;height:16px}
+.nav-logo{
+  font-family:var(--f-display);font-size:16px;
+  letter-spacing:.3em;color:var(--ink);text-decoration:none;
+}
+
+/* PAGE */
+.page{max-width:1100px;margin:0 auto;padding:clamp(40px,6vw,80px) clamp(24px,5vw,80px)}
+
+.product-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(40px,6vw,80px);align-items:start;
+}
+@media(max-width:720px){.product-grid{grid-template-columns:1fr}}
+
+/* IMAGE PANEL */
+.img-panel{
+  background:var(--white);
+  border:1px solid var(--border);
+  aspect-ratio:1/1;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.img-panel img{
+  width:100%;height:100%;object-fit:contain;
+  padding:40px;
+}
+.img-placeholder{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  opacity:.3;
+}
+.img-placeholder svg{width:80px;height:80px}
+.img-placeholder span{font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+.img-badge{
+  position:absolute;top:16px;left:16px;
+  font-size:8px;letter-spacing:.25em;text-transform:uppercase;
+  background:var(--gold);color:#fff;padding:5px 14px;
+}
+
+/* INFO PANEL */
+.brand-label{
+  font-size:9px;letter-spacing:.45em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+.watch-name{
+  font-family:var(--f-display);
+  font-size:clamp(26px,4vw,40px);
+  font-weight:500;letter-spacing:.04em;
+  color:var(--ink);line-height:1.05;margin-bottom:8px;
+}
+.watch-ref{
+  font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:24px;
+}
+.watch-price{
+  font-family:var(--f-display);font-size:28px;
+  color:var(--gold);letter-spacing:.05em;
+  padding:20px 0;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  margin-bottom:24px;
+}
+.watch-desc{
+  font-family:var(--f-serif);font-size:17px;font-style:italic;
+  font-weight:300;line-height:1.75;color:var(--mid);
+  letter-spacing:.02em;margin-bottom:32px;
+}
+
+/* SPECS */
+.specs-title{
+  font-size:9px;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;
+}
+.specs-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  border:1px solid var(--border);margin-bottom:32px;
+}
+.spec{
+  padding:14px 16px;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.spec:nth-child(even){border-right:none}
+.spec:nth-last-child(-n+2){border-bottom:none}
+.spec-k{font-size:8.5px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.spec-v{font-family:var(--f-serif);font-size:15px;color:var(--ink)}
+
+/* CTA */
+.cta-row{display:flex;flex-direction:column;gap:10px}
+.btn-enquire{
+  background:var(--gold);color:#fff;border:none;
+  padding:16px 32px;font-family:var(--f-sans);
+  font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  font-weight:500;cursor:pointer;
+  transition:background .25s,transform .2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-enquire:hover{background:var(--gold-lt);transform:translateY(-2px)}
+.btn-wa{
+  background:rgba(37,211,102,0.08);color:#25d366;
+  border:1px solid rgba(37,211,102,0.25);
+  padding:14px 32px;font-family:var(--f-sans);
+  font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  cursor:pointer;transition:background .25s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-wa:hover{background:rgba(37,211,102,0.14)}
+.btn-wa svg{width:16px;height:16px}
+
+/* TRUST */
+.trust-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);
+  margin-top:16px;
+}
+.trust-item{
+  background:var(--bg);padding:14px 12px;
+  text-align:center;
+}
+.trust-icon{font-size:18px;margin-bottom:6px}
+.trust-lbl{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+/* LOADING */
+#loading{
+  min-height:60vh;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:14px;
+}
+.spinner{
+  width:28px;height:28px;border:2px solid var(--border);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ENQUIRY MODAL */
+#eq-overlay{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(5,7,14,0.85);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:24px;
+}
+#eq-overlay.open{display:flex}
+.eq-box{
+  background:#0a0c18;border:1px solid rgba(200,165,90,0.2);
+  width:100%;max-width:460px;
+}
+.eq-head{padding:22px 26px;border-bottom:1px solid rgba(200,165,90,0.1);display:flex;justify-content:space-between;align-items:center}
+.eq-title{font-family:'Cinzel',serif;font-size:15px;letter-spacing:.1em;color:#f8f4ec}
+.eq-close{background:none;border:none;color:rgba(216,205,176,0.5);font-size:20px;cursor:pointer}
+.eq-price-strip{padding:12px 26px;background:rgba(200,165,90,0.05);border-bottom:1px solid rgba(200,165,90,0.08)}
+.eq-price{font-family:'Cinzel',serif;font-size:18px;color:#dfc078;letter-spacing:.05em}
+.eq-body{padding:24px 26px;display:flex;flex-direction:column;gap:14px}
+.eq-label{font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:rgba(200,165,90,0.6);display:block;margin-bottom:6px}
+.eq-input{
+  width:100%;background:#05070e;border:1px solid rgba(200,165,90,0.15);
+  color:#f8f4ec;padding:11px 14px;font-family:'Raleway',sans-serif;
+  font-size:13px;outline:none;letter-spacing:.05em;
+}
+.eq-input:focus{border-color:rgba(200,165,90,0.5)}
+.eq-textarea{resize:none;min-height:72px}
+.eq-submit{
+  width:100%;background:#c8a55a;color:#05070e;border:none;
+  padding:14px;font-family:'Raleway',sans-serif;
+  font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  font-weight:600;cursor:pointer;transition:background .2s;
+}
+.eq-submit:hover{background:#dfc078}
+.eq-error{color:#e05555;font-size:11px;display:none}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="hace_v2.html" class="nav-back">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to Collection
+  </a>
+  <a href="hace_v2.html" class="nav-logo">HACE</a>
+  <div style="width:120px"></div>
+</nav>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <span style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)">Loading...</span>
+</div>
+
+<div class="page" id="page-content" style="display:none">
+  <div class="product-grid">
+    <!-- Image -->
+    <div>
+      <div class="img-panel" id="img-panel">
+        <div class="img-placeholder">
+          <svg fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" stroke-opacity=".4"/>
+            <circle cx="40" cy="40" r="26" stroke-opacity=".2"/>
+            <circle cx="40" cy="40" r="2.5" fill="currentColor" fill-opacity=".4"/>
+            <line x1="40" y1="40" x2="40" y2="14" stroke-width="1.5" stroke-opacity=".6" stroke-linecap="round"/>
+            <line x1="40" y1="40" x2="56" y2="49" stroke-width="1.2" stroke-opacity=".4" stroke-linecap="round"/>
+          </svg>
+          <span>Photo coming soon</span>
+        </div>
+        <div class="img-badge" id="img-badge" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div>
+      <div class="brand-label" id="p-brand"></div>
+      <div class="watch-name" id="p-name"></div>
+      <div class="watch-ref" id="p-ref"></div>
+      <div class="watch-price" id="p-price"></div>
+      <div class="watch-desc" id="p-desc"></div>
+
+      <div class="specs-title">Specifications</div>
+      <div class="specs-grid" id="p-specs"></div>
+
+      <div class="cta-row">
+        <button class="btn-enquire" id="btn-enquire">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Enquire About This Watch
+        </button>
+        <button class="btn-wa" id="btn-wa">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Chat on WhatsApp
+        </button>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item"><div class="trust-icon">🛡️</div><div class="trust-lbl">Certified Authentic</div></div>
+        <div class="trust-item"><div class="trust-icon">📦</div><div class="trust-lbl">Free Delivery</div></div>
+        <div class="trust-item"><div class="trust-icon">🔄</div><div class="trust-lbl">2yr Service</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ENQUIRY MODAL -->
+<div id="eq-overlay">
+  <div class="eq-box">
+    <div class="eq-head">
+      <div class="eq-title" id="eq-title">Enquire</div>
+      <button class="eq-close" onclick="closeEq()">✕</button>
+    </div>
+    <div class="eq-price-strip"><div class="eq-price" id="eq-price"></div></div>
+    <div class="eq-body">
+      <div><label class="eq-label">Full Name *</label><input class="eq-input" id="eq-name" type="text" placeholder="Your name"></div>
+      <div><label class="eq-label">WhatsApp Number *</label><input class="eq-input" id="eq-phone" type="tel" placeholder="+254 7XX XXX XXX"></div>
+      <div><label class="eq-label">Message (optional)</label><textarea class="eq-input eq-textarea" id="eq-msg" placeholder="Any questions?"></textarea></div>
+      <div class="eq-error" id="eq-error">Please enter your name and phone number.</div>
+      <button class="eq-submit" id="eq-btn" onclick="sendEnquiry()">Send Enquiry via WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const HACE_WA = '254795149469'
+let product = {}
+
+async function loadProduct() {
+  const id = new URLSearchParams(window.location.search).get('id')
+  if (!id) { window.location.href = 'hace_v2.html'; return }
+
+  const response = await fetch(`/api/products?id=${encodeURIComponent(id)}`)
+  document.getElementById('loading').style.display = 'none'
+
+  if (!response.ok) {
+    document.getElementById('page-content').innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--muted)">Watch not found.</div>'
+    document.getElementById('page-content').style.display = 'block'
+    return
+  }
+
+  const data = await response.json()
+  if (!data) {
+    document.getElementById('page-content').innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--muted)">Watch not found.</div>'
+    document.getElementById('page-content').style.display = 'block'
+    return
+  }
+
+  product = data
+
+  // Update page title
+  document.title = `${data.name} — HACE Watch House`
+
+  // Populate
+  document.getElementById('p-brand').textContent = data.brand
+  document.getElementById('p-name').textContent  = data.name
+  document.getElementById('p-ref').textContent   = 'Ref. ' + (data.ref_number || '—')
+  document.getElementById('p-price').textContent = 'KES ' + Number(data.price_kes).toLocaleString('en-KE')
+  document.getElementById('p-desc').textContent  = data.description || ''
+
+  // Badge
+  if (data.badge) {
+    const b = document.getElementById('img-badge')
+    b.textContent = data.badge
+    b.style.display = 'block'
+  }
+
+  // Image
+  if (data.images && data.images.length > 0) {
+    const imgPanel = document.getElementById('img-panel')
+    imgPanel.innerHTML = `<img src="${data.images[0]}" alt="${data.name}">`
+    if (data.badge) imgPanel.innerHTML += `<div class="img-badge">${data.badge}</div>`
+  }
+
+  // Specs
+  const specs = [
+    { k: 'Movement',      v: data.movement      },
+    { k: 'Case',          v: data.case_size      },
+    { k: 'Water Resist',  v: data.water_resist   },
+    { k: 'Power Reserve', v: data.power_reserve  },
+    { k: 'Crystal',       v: data.crystal        },
+    { k: 'Complications', v: data.complications  },
+  ].filter(s => s.v)
+
+  document.getElementById('p-specs').innerHTML = specs.map(s => `
+    <div class="spec">
+      <div class="spec-k">${s.k}</div>
+      <div class="spec-v">${s.v}</div>
+    </div>
+  `).join('')
+
+  document.getElementById('page-content').style.display = 'block'
+
+  // Button handlers
+  document.getElementById('btn-enquire').onclick = openEq
+  document.getElementById('btn-wa').onclick = () => {
+    const txt = encodeURIComponent(`Hello HACE! I'm interested in the *${data.name}* (Ref. ${data.ref_number}) priced at KES ${Number(data.price_kes).toLocaleString('en-KE')}. Please assist.`)
+    window.open(`https://wa.me/${HACE_WA}?text=${txt}`, '_blank')
+  }
+}
+
+function openEq() {
+  document.getElementById('eq-title').textContent = product.name
+  document.getElementById('eq-price').textContent = 'KES ' + Number(product.price_kes).toLocaleString('en-KE')
+  document.getElementById('eq-name').value = ''
+  document.getElementById('eq-phone').value = ''
+  document.getElementById('eq-msg').value = ''
+  document.getElementById('eq-error').style.display = 'none'
+  document.getElementById('eq-btn').textContent = 'Send Enquiry via WhatsApp'
+  document.getElementById('eq-overlay').classList.add('open')
+}
+
+function closeEq() {
+  document.getElementById('eq-overlay').classList.remove('open')
+}
+
+document.getElementById('eq-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('eq-overlay')) closeEq()
+})
+
+async function sendEnquiry() {
+  const name  = document.getElementById('eq-name').value.trim()
+  const phone = document.getElementById('eq-phone').value.trim()
+  const msg   = document.getElementById('eq-msg').value.trim()
+  const btn   = document.getElementById('eq-btn')
+
+  if (!name || !phone) {
+    document.getElementById('eq-error').style.display = 'block'
+    return
+  }
+  document.getElementById('eq-error').style.display = 'none'
+  btn.textContent = 'Sending...'
+
+  const response = await fetch('/api/enquiries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      phone,
+      message: msg || null,
+      product_name: product.name,
+      status: 'new'
+    })
+  })
+
+  if (!response.ok) {
+    console.error('Enquiry save failed:', await response.text())
+  }
+
+  const waText = encodeURIComponent(
+    `Hello HACE Watch House! 👋\n\n` +
+    `I'm interested in the *${product.name}* (Ref. ${product.ref_number})\n` +
+    `Price: KES ${Number(product.price_kes).toLocaleString('en-KE')}\n\n` +
+    `My name: ${name}\n` +
+    (msg ? `Message: ${msg}\n\n` : '\n') +
+    `Please get in touch. Thank you!`
+  )
+
+  btn.textContent = '✓ Opening WhatsApp...'
+  setTimeout(() => {
+    closeEq()
+    window.open(`https://wa.me/${HACE_WA}?text=${waText}`, '_blank')
+  }, 500)
+}
+
+loadProduct()
+</script>
+</body>
+</html>
