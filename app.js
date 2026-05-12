@@ -226,13 +226,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // ══ MODAL FUNCTIONS ════════════════════════════════
 async function loadModalProducts() {
   try {
-    const { data: products, error } = await db
-      .from('products')
-      .select('*')
-      .gt('stock', 0)
-      .order('created_at', { ascending: false })
-
-    if (error) throw error
+    const response = await fetch('/api/products')
+    if (!response.ok) throw new Error('Failed to load modal products')
+    const products = await response.json()
     if (!products || products.length === 0) return
 
     const grid = document.querySelector('.modal-grid')

@@ -205,11 +205,11 @@ nav{
 <body>
 
 <nav>
-  <a href="hace_v2.html" class="nav-back">
+  <a href="index.html" class="nav-back">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Back to Collection
   </a>
-  <a href="hace_v2.html" class="nav-logo">HACE</a>
+  <a href="index.html" class="nav-logo">HACE</a>
   <div style="width:120px"></div>
 </nav>
 
@@ -292,7 +292,7 @@ let product = {}
 
 async function loadProduct() {
   const id = new URLSearchParams(window.location.search).get('id')
-  if (!id) { window.location.href = 'hace_v2.html'; return }
+  if (!id) { window.location.href = 'index.html'; return }
 
   const response = await fetch(`/api/products?id=${encodeURIComponent(id)}`)
   document.getElementById('loading').style.display = 'none'
