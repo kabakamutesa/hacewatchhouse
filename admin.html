@@ -26,6 +26,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--f-sans);font-weig
 #login-screen.hidden{display:none}
 .login-box{width:100%;max-width:400px;padding:52px 44px;border:1px solid var(--border);background:var(--surface)}
 .login-logo{font-family:var(--f-display);font-size:28px;letter-spacing:.3em;color:var(--gold);text-align:center;margin-bottom:4px}
+.login-logo img{max-width:120px;height:auto;display:block;margin:0 auto 12px}
 .login-sub{font-size:9px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-dk);text-align:center;margin-bottom:40px}
 .login-label{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
 .login-input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--white);padding:14px 16px;font-family:var(--f-sans);font-size:13px;letter-spacing:.06em;outline:none;transition:border-color .3s;margin-bottom:20px}
@@ -39,6 +40,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--f-sans);font-weig
 #app.visible{display:flex}
 #sidebar{width:220px;min-height:100vh;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .sb-logo{padding:32px 28px 24px;border-bottom:1px solid var(--border)}
+.sb-logo-img{width:48px;height:auto;display:block;margin-bottom:12px;border-radius:8px;object-fit:contain}
 .sb-logo-h{font-family:var(--f-display);font-size:16px;letter-spacing:.25em;color:var(--gold)}
 .sb-logo-s{font-size:7.5px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold-dk);margin-top:2px}
 .sb-nav{padding:20px 0;flex:1}
@@ -155,7 +157,7 @@ tbody td{padding:14px 18px;font-size:12px;color:var(--cream);letter-spacing:.04e
 
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">HACE</div>
+    <div class="login-logo"><img src="assets/hace%20logo.jpeg" alt="HACE logo">HACE</div>
     <div class="login-sub">Admin Panel · Watch House</div>
     <label class="login-label">Password</label>
     <input type="password" class="login-input" id="login-input" placeholder="Enter admin password">
@@ -167,6 +169,7 @@ tbody td{padding:14px 18px;font-size:12px;color:var(--cream);letter-spacing:.04e
 <div id="app">
   <aside id="sidebar">
     <div class="sb-logo">
+      <img src="assets/hace%20logo.jpeg" alt="HACE logo" class="sb-logo-img">
       <div class="sb-logo-h">HACE</div>
       <div class="sb-logo-s">Admin Dashboard</div>
     </div>
@@ -299,14 +302,8 @@ tbody td{padding:14px 18px;font-size:12px;color:var(--cream);letter-spacing:.04e
           </select>
         </div>
         <div class="field span2"><label class="field-label">Description *</label><textarea class="field-textarea" id="f-description" placeholder="Describe this watch..."></textarea></div>
-        <div class="form-section-label" style="margin-top:8px">Specifications</div>
+        <div class="form-section-label" style="margin-top:8px">Images</div>
         <div class="form-divider"></div>
-        <div class="field"><label class="field-label">Movement</label><input type="text" class="field-input" id="f-movement" placeholder="e.g. Automatic Cal. 3235"></div>
-        <div class="field"><label class="field-label">Case Size</label><input type="text" class="field-input" id="f-case" placeholder="e.g. 41mm Stainless Steel"></div>
-        <div class="field"><label class="field-label">Water Resistance</label><input type="text" class="field-input" id="f-water" placeholder="e.g. 100m / 330ft"></div>
-        <div class="field"><label class="field-label">Power Reserve</label><input type="text" class="field-input" id="f-power" placeholder="e.g. 70 Hours"></div>
-        <div class="field"><label class="field-label">Crystal</label><input type="text" class="field-input" id="f-crystal" placeholder="e.g. Sapphire Crystal"></div>
-        <div class="field"><label class="field-label">Complications</label><input type="text" class="field-input" id="f-complications" placeholder="e.g. GMT, Moon Phase"></div>
         <div class="field span2">
           <label class="field-label">Watch Photos</label>
           <input type="file" id="f-images" accept="image/*" multiple
@@ -490,12 +487,6 @@ function openEdit(id) {
   document.getElementById('f-badge').value         = p.badge||''
   document.getElementById('f-featured').value      = p.featured?'true':'false'
   document.getElementById('f-description').value   = p.description||''
-  document.getElementById('f-movement').value      = p.movement||''
-  document.getElementById('f-case').value          = p.case_size||''
-  document.getElementById('f-water').value         = p.water_resist||''
-  document.getElementById('f-power').value         = p.power_reserve||''
-  document.getElementById('f-crystal').value       = p.crystal||''
-  document.getElementById('f-complications').value = p.complications||''
   openModal()
 }
 
@@ -514,12 +505,6 @@ document.getElementById('modal-save').addEventListener('click', async () => {
     badge:         document.getElementById('f-badge').value,
     featured:      document.getElementById('f-featured').value==='true',
     description:   document.getElementById('f-description').value.trim(),
-    movement:      document.getElementById('f-movement').value.trim(),
-    case_size:     document.getElementById('f-case').value.trim(),
-    water_resist:  document.getElementById('f-water').value.trim(),
-    power_reserve: document.getElementById('f-power').value.trim(),
-    crystal:       document.getElementById('f-crystal').value.trim(),
-    complications: document.getElementById('f-complications').value.trim(),
   }
 
   const btn = document.getElementById('modal-save')
@@ -572,7 +557,7 @@ document.getElementById('confirm-delete').addEventListener('click', async () => 
 function openModal()  { document.getElementById('modal-overlay').classList.add('open') }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open') }
 function clearForm()  {
-  ['f-name','f-brand','f-ref','f-slug','f-price','f-description','f-movement','f-case','f-water','f-power','f-crystal','f-complications']
+  ['f-name','f-brand','f-ref','f-slug','f-price','f-description']
     .forEach(id => document.getElementById(id).value='')
   document.getElementById('f-stock').value='1'
   document.getElementById('f-badge').value=''
