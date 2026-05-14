@@ -359,7 +359,13 @@ html, body { width: 100vw !important; margin: 0 !important; padding: 0 !importan
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://laysnjulmwuhvuvspbuz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxheXNuanVsbXd1aHZ1dnNwYnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDI4NDcsImV4cCI6MjA5MzAxODg0N30.B_Xwa1H2Br30QrPEDHfMouL_SXmzlPebIDgjA7KQHCw'
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+
 const HACE_WA = '254795149469'
 let product = {}
 
@@ -367,7 +373,7 @@ async function loadProduct() {
   const id = new URLSearchParams(window.location.search).get('id')
   if (!id) { window.location.href = 'index.html'; return }
 
-  const response = await fetch(`/api/products?id=${encodeURIComponent(id)}`)
+  const { data, error } = await db.from('products').select('*').eq('id', id).single()
   document.getElementById('loading').style.display = 'none'
 
   if (!response.ok) {

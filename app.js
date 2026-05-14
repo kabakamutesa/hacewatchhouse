@@ -1,6 +1,23 @@
 /* ══ PUBLIC API ROUTES ══════════════════════════════════ */
 /* Product data, enquiries and subscriber signups are routed through server-side endpoints. */
 
+const SUPABASE_URL = 'https://laysnjulmwuhvuvspbuz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxheXNuanVsbXd1aHZ1dnNwYnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDI4NDcsImV4cCI6MjA5MzAxODg0N30.B_Xwa1H2Br30QrPEDHfMouL_SXmzlPebIDgjA7KQHCw'
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+async function getProductsFromSupabase() {
+  const { data, error } = await db.from('products').select('*').gt('stock', 0).order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+async function getProductById(id) {
+  const { data, error } = await db.from('products').select('*').eq('id', id).single()
+  if (error) throw error
+  return data
+}
+
 /* ══ ENQUIRY MODAL ══════════════════════════════════ */
 // Your HACE WhatsApp number — change this
 const HACE_WHATSAPP = '254795149469'
@@ -144,11 +161,8 @@ async function submitNewsletter() {
 
 async function loadProducts() {
   try {
-    console.log('📦 Loading products from server API...')
-
-    const response = await fetch('/api/products')
-    if (!response.ok) throw new Error('Failed to load products')
-    const products = await response.json()
+    console.log('📦 Loading products from Supabase...')
+    const products = await getProductsFromSupabase()
 
     if (!products || products.length === 0) {
       console.warn('⚠️ No products found in database')
@@ -226,9 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ══ MODAL FUNCTIONS ════════════════════════════════
 async function loadModalProducts() {
   try {
-    const response = await fetch('/api/products')
-    if (!response.ok) throw new Error('Failed to load modal products')
-    const products = await response.json()
+    const products = await getProductsFromSupabase()
     if (!products || products.length === 0) return
 
     const grid = document.querySelector('.modal-grid')
