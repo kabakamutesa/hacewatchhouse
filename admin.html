@@ -302,14 +302,8 @@ tbody td{padding:14px 18px;font-size:12px;color:var(--cream);letter-spacing:.04e
           </select>
         </div>
         <div class="field span2"><label class="field-label">Description *</label><textarea class="field-textarea" id="f-description" placeholder="Describe this watch..."></textarea></div>
-        <div class="form-section-label" style="margin-top:8px">Specifications</div>
+        <div class="form-section-label" style="margin-top:8px">Images</div>
         <div class="form-divider"></div>
-        <div class="field"><label class="field-label">Movement</label><input type="text" class="field-input" id="f-movement" placeholder="e.g. Automatic Cal. 3235"></div>
-        <div class="field"><label class="field-label">Case Size</label><input type="text" class="field-input" id="f-case" placeholder="e.g. 41mm Stainless Steel"></div>
-        <div class="field"><label class="field-label">Water Resistance</label><input type="text" class="field-input" id="f-water" placeholder="e.g. 100m / 330ft"></div>
-        <div class="field"><label class="field-label">Power Reserve</label><input type="text" class="field-input" id="f-power" placeholder="e.g. 70 Hours"></div>
-        <div class="field"><label class="field-label">Crystal</label><input type="text" class="field-input" id="f-crystal" placeholder="e.g. Sapphire Crystal"></div>
-        <div class="field"><label class="field-label">Complications</label><input type="text" class="field-input" id="f-complications" placeholder="e.g. GMT, Moon Phase"></div>
         <div class="field span2">
           <label class="field-label">Watch Photos</label>
           <input type="file" id="f-images" accept="image/*" multiple
@@ -493,12 +487,6 @@ function openEdit(id) {
   document.getElementById('f-badge').value         = p.badge||''
   document.getElementById('f-featured').value      = p.featured?'true':'false'
   document.getElementById('f-description').value   = p.description||''
-  document.getElementById('f-movement').value      = p.movement||''
-  document.getElementById('f-case').value          = p.case_size||''
-  document.getElementById('f-water').value         = p.water_resist||''
-  document.getElementById('f-power').value         = p.power_reserve||''
-  document.getElementById('f-crystal').value       = p.crystal||''
-  document.getElementById('f-complications').value = p.complications||''
   openModal()
 }
 
@@ -517,12 +505,6 @@ document.getElementById('modal-save').addEventListener('click', async () => {
     badge:         document.getElementById('f-badge').value,
     featured:      document.getElementById('f-featured').value==='true',
     description:   document.getElementById('f-description').value.trim(),
-    movement:      document.getElementById('f-movement').value.trim(),
-    case_size:     document.getElementById('f-case').value.trim(),
-    water_resist:  document.getElementById('f-water').value.trim(),
-    power_reserve: document.getElementById('f-power').value.trim(),
-    crystal:       document.getElementById('f-crystal').value.trim(),
-    complications: document.getElementById('f-complications').value.trim(),
   }
 
   const btn = document.getElementById('modal-save')
@@ -575,7 +557,7 @@ document.getElementById('confirm-delete').addEventListener('click', async () => 
 function openModal()  { document.getElementById('modal-overlay').classList.add('open') }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open') }
 function clearForm()  {
-  ['f-name','f-brand','f-ref','f-slug','f-price','f-description','f-movement','f-case','f-water','f-power','f-crystal','f-complications']
+  ['f-name','f-brand','f-ref','f-slug','f-price','f-description']
     .forEach(id => document.getElementById(id).value='')
   document.getElementById('f-stock').value='1'
   document.getElementById('f-badge').value=''

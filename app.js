@@ -187,14 +187,19 @@ async function loadProducts() {
       card.className = `w-card${i === 0 ? ' featured' : ''} reveal${delay}`
 
       card.innerHTML = `
-        <div class="card-bg card-art">
-          <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-            <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
-            <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
-            <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
-            <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
-            <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+        <div class="card-bg">
+          ${p.images && p.images.length > 0
+            ? `<img src="${p.images[0]}" alt="${p.name}" class="card-image">`
+            : `<div class="card-art">
+                <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+                  <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
+                  <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
+                  <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
+                  <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>`
+          }
         </div>
         ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
         <div class="card-admin admin-only" data-action="add-to-inventory">
@@ -254,14 +259,19 @@ async function loadModalProducts() {
       card.className = `w-card reveal`
 
       card.innerHTML = `
-        <div class="card-bg card-art">
-          <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-            <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
-            <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
-            <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
-            <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
-            <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+        <div class="card-bg">
+          ${p.images && p.images.length > 0
+            ? `<img src="${p.images[0]}" alt="${p.name}" class="card-image">`
+            : `<div class="card-art">
+                <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+                  <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
+                  <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
+                  <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
+                  <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>`
+          }
         </div>
         ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
         <div class="card-admin admin-only" data-action="add-to-inventory">
