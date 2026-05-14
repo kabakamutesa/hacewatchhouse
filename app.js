@@ -1,6 +1,23 @@
 /* ══ PUBLIC API ROUTES ══════════════════════════════════ */
 /* Product data, enquiries and subscriber signups are routed through server-side endpoints. */
 
+const SUPABASE_URL = 'https://laysnjulmwuhvuvspbuz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxheXNuanVsbXd1aHZ1dnNwYnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDI4NDcsImV4cCI6MjA5MzAxODg0N30.B_Xwa1H2Br30QrPEDHfMouL_SXmzlPebIDgjA7KQHCw'
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+async function getProductsFromSupabase() {
+  const { data, error } = await db.from('products').select('*').gt('stock', 0).order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+async function getProductById(id) {
+  const { data, error } = await db.from('products').select('*').eq('id', id).single()
+  if (error) throw error
+  return data
+}
+
 /* ══ ENQUIRY MODAL ══════════════════════════════════ */
 // Your HACE WhatsApp number — change this
 const HACE_WHATSAPP = '254795149469'
@@ -144,11 +161,8 @@ async function submitNewsletter() {
 
 async function loadProducts() {
   try {
-    console.log('📦 Loading products from server API...')
-
-    const response = await fetch('/api/products')
-    if (!response.ok) throw new Error('Failed to load products')
-    const products = await response.json()
+    console.log('📦 Loading products from Supabase...')
+    const products = await getProductsFromSupabase()
 
     if (!products || products.length === 0) {
       console.warn('⚠️ No products found in database')
@@ -173,14 +187,19 @@ async function loadProducts() {
       card.className = `w-card${i === 0 ? ' featured' : ''} reveal${delay}`
 
       card.innerHTML = `
-        <div class="card-bg card-art">
-          <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-            <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
-            <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
-            <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
-            <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
-            <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+        <div class="card-bg">
+          ${p.images && p.images.length > 0
+            ? `<img src="${p.images[0]}" alt="${p.name}" class="card-image">`
+            : `<div class="card-art">
+                <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+                  <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
+                  <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
+                  <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
+                  <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>`
+          }
         </div>
         ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
         <div class="card-admin admin-only" data-action="add-to-inventory">
@@ -226,9 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ══ MODAL FUNCTIONS ════════════════════════════════
 async function loadModalProducts() {
   try {
-    const response = await fetch('/api/products')
-    if (!response.ok) throw new Error('Failed to load modal products')
-    const products = await response.json()
+    const products = await getProductsFromSupabase()
     if (!products || products.length === 0) return
 
     const grid = document.querySelector('.modal-grid')
@@ -242,14 +259,19 @@ async function loadModalProducts() {
       card.className = `w-card reveal`
 
       card.innerHTML = `
-        <div class="card-bg card-art">
-          <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-            <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
-            <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
-            <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
-            <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
-            <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+        <div class="card-bg">
+          ${p.images && p.images.length > 0
+            ? `<img src="${p.images[0]}" alt="${p.name}" class="card-image">`
+            : `<div class="card-art">
+                <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+                  <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
+                  <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
+                  <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
+                  <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>`
+          }
         </div>
         ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
         <div class="card-admin admin-only" data-action="add-to-inventory">
