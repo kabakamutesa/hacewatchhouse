@@ -346,7 +346,9 @@ tbody td{padding:14px 18px;font-size:12px;color:var(--cream);letter-spacing:.04e
 /* ══ CONFIG — REPLACE THESE ════════════════════════ */
 const SUPABASE_URL   ='https://laysnjulmwuhvuvspbuz.supabase.co'
 const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxheXNuanVsbXd1aHZ1dnNwYnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDI4NDcsImV4cCI6MjA5MzAxODg0N30.B_Xwa1H2Br30QrPEDHfMouL_SXmzlPebIDgjA7KQHCw'
-const ADMIN_PASSWORD = 'hacedb2026admin'  // ← change this
+const ADMIN_PASSWORD = 'haceadmin'  // ← change this
+// ⚠️  BUCKET NAME: must match EXACTLY what appears in Supabase → Storage (copy-paste it)
+const STORAGE_BUCKET = 'hace watchhouse'  // ← update this if your bucket name differs
 
 /* ══ INIT ══════════════════════════════════════════ */
 const { createClient } = supabase
@@ -459,14 +461,20 @@ document.getElementById('f-name').addEventListener('input', e => {
 async function uploadImages(productId) {
   const files = document.getElementById('f-images').files
   if (!files.length) return []
+  console.log(`📤 Uploading ${files.length} image(s) to bucket: "${STORAGE_BUCKET}" for product: ${productId}`)
 
   const urls = []
   for (const file of Array.from(files).slice(0, 5)) {
-    const ext  = file.name.split('.').pop()
+    const ext  = file.name.split('.').pop().toLowerCase()
     const path = `${productId}/${Date.now()}.${ext}`
-    const { error } = await db.storage.from('watch-images').upload(path, file)
-    if (!error) {
-      const { data } = db.storage.from('watch-images').getPublicUrl(path)
+    console.log(`  Uploading: ${path} (${(file.size/1024).toFixed(1)} KB)`)
+    const { error } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: true })
+    if (error) {
+      console.error(`  ❌ Upload failed:`, error.message, error)
+      showToast(`Upload failed: ${error.message}`, 'error')
+    } else {
+      const { data } = db.storage.from(STORAGE_BUCKET).getPublicUrl(path)
+      console.log(`  ✅ Uploaded:`, data.publicUrl)
       urls.push(data.publicUrl)
     }
   }
@@ -488,15 +496,19 @@ function openEdit(id) {
   document.getElementById('f-featured').value      = p.featured?'true':'false'
   document.getElementById('f-description').value   = p.description||''
   
-  // Display current images
+  // Display current images with individual remove buttons
   const imagesDiv = document.getElementById('current-images')
   imagesDiv.innerHTML = ''
   if (p.images && p.images.length > 0) {
-    p.images.forEach(url => {
-      const img = document.createElement('img')
-      img.src = url
-      img.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid rgba(200,165,90,0.2)'
-      imagesDiv.appendChild(img)
+    p.images.forEach((url, idx) => {
+      const wrap = document.createElement('div')
+      wrap.style.cssText = 'position:relative;display:inline-block'
+      wrap.innerHTML = `
+        <img src="${url}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid rgba(200,165,90,0.2);display:block">
+        <button onclick="removeImage('${p.id}',${idx})" title="Remove image"
+          style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#e05555;border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      `
+      imagesDiv.appendChild(wrap)
     })
   }
   openModal()
@@ -509,6 +521,13 @@ document.getElementById('modal-save').addEventListener('click', async () => {
   const price = document.getElementById('f-price').value
   if (!name||!brand||!slug||!price) { showToast('Fill in all required fields','error'); return }
 
+  // Fetch FRESH images from DB (not stale local state) to avoid overwriting or cross-contaminating
+  let existingImages = []
+  if (editingId) {
+    const { data: freshP } = await db.from('products').select('images').eq('id', editingId).single()
+    existingImages = freshP?.images || []
+  }
+
   const payload = {
     name, brand, slug,
     ref_number:    document.getElementById('f-ref').value.trim(),
@@ -517,28 +536,67 @@ document.getElementById('modal-save').addEventListener('click', async () => {
     badge:         document.getElementById('f-badge').value,
     featured:      document.getElementById('f-featured').value==='true',
     description:   document.getElementById('f-description').value.trim(),
-    images:        []
+    images:        existingImages   // ← always carry existing images forward in the payload
   }
 
   const btn = document.getElementById('modal-save')
   btn.textContent = 'Saving...'; btn.disabled = true
 
   let savedId = editingId
+  let saveError = null
 
   if (!editingId) {
     const { data: inserted, error: insertErr } = await db
-      .from('products').insert(payload).select().single()
-    if (insertErr) { showToast(insertErr.message, 'error'); btn.disabled = false; btn.textContent = 'Save Watch'; return }
+      .from('products')
+      .insert(payload)
+      .select()
+      .single()
+
+    if (insertErr) {
+      showToast(insertErr.message, 'error')
+      btn.disabled = false
+      btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Watch'
+      return
+    }
     savedId = inserted.id
   } else {
-    const { error: updateErr } = await db.from('products').update(payload).eq('id', editingId)
-    if (updateErr) { showToast(updateErr.message, 'error'); btn.disabled = false; btn.textContent = 'Save Watch'; return }
+    const { error: updateErr } = await db
+      .from('products')
+      .update(payload)
+      .eq('id', editingId)
+
+    if (updateErr) {
+      showToast(updateErr.message, 'error')
+      btn.disabled = false
+      btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Watch'
+      return
+    }
+    saveError = updateErr
   }
 
+  // Upload any newly selected images and append to the existing array already saved in payload
   const newImages = await uploadImages(savedId)
   if (newImages.length > 0) {
-    const existing = allProducts.find(p => p.id === savedId)?.images || []
-    await db.from('products').update({ images: [...existing, ...newImages] }).eq('id', savedId)
+    // Re-fetch what was just saved (includes existingImages from payload above)
+    const { data: savedProduct } = await db
+      .from('products')
+      .select('images')
+      .eq('id', savedId)
+      .single()
+
+    const allImages = [...(savedProduct?.images || []), ...newImages]
+
+    const { error: imgErr } = await db
+      .from('products')
+      .update({ images: allImages })
+      .eq('id', savedId)
+
+    if (imgErr) {
+      console.error('Image save failed:', imgErr.message)
+      showToast('Watch saved but image upload failed. Check Supabase storage policies.', 'error')
+    } else {
+      console.log('✅ Images saved:', allImages)
+    }
   }
 
   btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Watch'
@@ -547,6 +605,20 @@ document.getElementById('modal-save').addEventListener('click', async () => {
   showToast(editingId ? 'Watch updated ✓' : 'Watch added — live on website ✓')
   closeModal(); loadProducts()
 })
+
+/* ══ REMOVE INDIVIDUAL IMAGE ══════════════════════════ */
+async function removeImage(productId, index) {
+  const p = allProducts.find(x => x.id === productId)
+  if (!p) return
+  const updated = [...(p.images || [])]
+  updated.splice(index, 1)
+  const { error } = await db.from('products').update({ images: updated }).eq('id', productId)
+  if (error) { showToast('Failed to remove image: ' + error.message, 'error'); return }
+  // Update local cache so the UI reflects immediately without re-fetching
+  p.images = updated
+  openEdit(productId) // refresh modal thumbnails
+  showToast('Image removed ✓')
+}
 
 /* ══ DELETE ════════════════════════════════════════ */
 function openDelete(id, name) {

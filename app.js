@@ -3,11 +3,17 @@
 
 const SUPABASE_URL = 'https://laysnjulmwuhvuvspbuz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxheXNuanVsbXd1aHZ1dnNwYnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDI4NDcsImV4cCI6MjA5MzAxODg0N30.B_Xwa1H2Br30QrPEDHfMouL_SXmzlPebIDgjA7KQHCw'
-const { createClient } = supabase
-const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+let db = null
+
+if (!window.supabase) {
+  console.error('Supabase SDK not loaded')
+} else {
+  const { createClient } = supabase
+  db = createClient(SUPABASE_URL, SUPABASE_KEY)
+}
 
 async function getProductsFromSupabase() {
-  const { data, error } = await db.from('products').select('*').gt('stock', 0).order('created_at', { ascending: false })
+  const { data, error } = await db.from('products').select('*').gte('stock', 0).order('created_at', { ascending: false })
   if (error) throw error
   return data
 }
@@ -20,7 +26,7 @@ async function getProductById(id) {
 
 /* ══ ENQUIRY MODAL ══════════════════════════════════ */
 // Your HACE WhatsApp number — change this
-const HACE_WHATSAPP = '254795149469'
+const HACE_WHATSAPP = '254776541171'
 
 let currentEnquiry = {}
 
@@ -68,21 +74,17 @@ async function submitEnquiry() {
   btn.textContent = 'Sending...'
   btn.style.opacity = '.7'
 
-  const response = await fetch('/api/enquiries', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  try {
+    const { error: insErr } = await db.from('enquiries').insert({
       name,
       phone,
       message: message || null,
       product_name: currentEnquiry.name,
       status: 'new'
     })
-  })
-
-  if (!response.ok) {
-    console.error('Enquiry save failed:', await response.text())
-    // Still open WhatsApp even if the save fails
+    if (insErr) console.error('Supabase enquiry save failed:', insErr.message)
+  } catch (err) {
+    console.error('Enquiry save error:', err.message)
   }
 
   // Build WhatsApp message
@@ -123,28 +125,31 @@ async function submitNewsletter() {
   btn.textContent  = 'Submitting...'
   btn.style.opacity = '.7'
 
-  const response = await fetch('/api/subscribers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: name || null, email, phone: phone || null })
-  })
-
-  btn.style.opacity = '1'
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    const errorMessage = body.error || 'Something went wrong. Please try again.'
-    if (errorMessage.toLowerCase().includes('duplicate')) {
-      msg.style.color   = '#c8a55a'
-      msg.textContent   = 'You are already on our private list.'
-    } else {
-      msg.style.color   = '#e05555'
-      msg.textContent   = errorMessage
+  try {
+    const { error: insErr } = await db.from('subscribers').insert({ name: name || null, email, phone: phone || null })
+    if (insErr) {
+      const errorMessage = insErr.message || 'Something went wrong. Please try again.'
+      if (errorMessage.toLowerCase().includes('duplicate')) {
+        msg.style.color   = '#c8a55a'
+        msg.textContent   = 'You are already on our private list.'
+      } else {
+        msg.style.color   = '#e05555'
+        msg.textContent   = errorMessage
+      }
+      msg.style.display = 'block'
+      btn.textContent   = 'Request Private Access'
+      btn.style.opacity = '1'
+      return
     }
+  } catch (err) {
+    msg.style.color   = '#e05555'
+    msg.textContent   = err.message || 'Something went wrong. Please try again.'
     msg.style.display = 'block'
     btn.textContent   = 'Request Private Access'
+    btn.style.opacity = '1'
     return
   }
+  btn.style.opacity = '1'
 
   // Success
   msg.style.display = 'block'
@@ -187,19 +192,17 @@ async function loadProducts() {
       card.className = `w-card${i === 0 ? ' featured' : ''} reveal${delay}`
 
       card.innerHTML = `
-        <div class="card-bg">
+        <div class="card-bg card-art" style="position:relative;background:var(--off-white)">
           ${p.images && p.images.length > 0
-            ? `<img src="${p.images[0]}" alt="${p.name}" class="card-image">`
-            : `<div class="card-art">
-                <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-                  <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
-                  <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
-                  <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
-                  <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </div>`
+            ? `<img src="${p.images[0]}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+            : `<svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+                <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
+                <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
+                <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>`
           }
+          ${p.stock === 0 ? `<div style="position:absolute;inset:0;background:rgba(5,7,14,0.55);display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(248,244,236,0.7);pointer-events:none">Sold Out</div>` : ''}
         </div>
         ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
         <div class="card-admin admin-only" data-action="add-to-inventory">
@@ -213,7 +216,10 @@ async function loadProducts() {
           <div class="card-sub">${p.complications || ''}</div>
           <div class="card-footer">
             <div class="card-price">KES ${Number(p.price_kes).toLocaleString('en-KE')}</div>
-            <div class="card-cta" onclick="event.preventDefault();openEnquiry('${p.name}','${p.ref_number}','KES ${Number(p.price_kes).toLocaleString('en-KE')}','${p.slug}')">Enquire</div>
+            ${p.stock > 0
+              ? `<div class="card-cta" onclick="event.preventDefault();openEnquiry('${p.name}','${p.ref_number}','KES ${Number(p.price_kes).toLocaleString('en-KE')}','${p.slug}')">Enquire</div>`
+              : `<div class="card-cta" style="opacity:.4;cursor:not-allowed;pointer-events:none">Sold Out</div>`
+            }
           </div>
         </div>
         <div class="card-shimmer"></div>
@@ -259,18 +265,15 @@ async function loadModalProducts() {
       card.className = `w-card reveal`
 
       card.innerHTML = `
-        <div class="card-bg">
+        <div class="card-bg card-art" style="background:var(--off-white)">
           ${p.images && p.images.length > 0
-            ? `<img src="${p.images[0]}" alt="${p.name}" class="card-image">`
-            : `<div class="card-art">
-                <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-                  <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
-                  <circle cx="65" cy="65" r="44" stroke="rgba(200,165,90,0.1)" stroke-width=".5"/>
-                  <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
-                  <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </div>`
+            ? `<img src="${p.images[0]}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+            : `<svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+                <circle cx="65" cy="65" r="55" stroke="rgba(200,165,90,0.25)" stroke-width="1.2"/>
+                <circle cx="65" cy="65" r="3.5" fill="rgba(200,165,90,0.9)"/>
+                <line x1="65" y1="65" x2="65" y2="22" stroke="rgba(200,165,90,0.95)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="65" y1="65" x2="88" y2="77" stroke="rgba(200,165,90,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>`
           }
         </div>
         ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}

@@ -3,10 +3,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { createClient } = require('@supabase/supabase-js')
-  const db = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-  )
+  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
   const payload = req.body
   const { data, error } = await db.from('enquiries').insert(payload)

@@ -404,7 +404,7 @@ nav.scrolled::after {
 .hero-h1 {
   font-family: var(--display);
   font-size: clamp(48px, 6vw, 80px);
-  font-weight: 700; line-height: .88;
+  font-weight: 1000; line-height: .88;
   letter-spacing: .02em;
   color: var(--gold-bright);
   margin-bottom: 32px;
@@ -423,6 +423,7 @@ nav.scrolled::after {
   font-size: 0.7em;
   font-family: var(--serif);
   font-style: italic;
+  font-weight: bold;
 }
 .h1-line:nth-child(1) .h1-inner { animation-delay: .3s; }
 @keyframes revealLine { to { transform: translateY(0); } }
@@ -431,7 +432,7 @@ nav.scrolled::after {
 .hero-tag {
   font-family: var(--serif);
   font-size: clamp(18px, 2vw, 26px);
-  font-weight: 400; font-style: italic;
+  font-weight:bolder; font-style: italic;
   color: rgba(248,244,236,0.92); opacity: 0;
   letter-spacing: .04em; margin-bottom: 36px;
   animation: fadeSlide .9s .8s var(--ease-out-expo) forwards;
@@ -1326,7 +1327,7 @@ nav.scrolled::after {
 .nl-title {
   font-family: var(--display);
   font-size: clamp(36px, 4vw, 52px);
-  font-weight: 500; letter-spacing: .04em;
+  font-weight: 1000; letter-spacing: .04em;
   color: var(--gold-bright); line-height: 1.05; margin-bottom: 18px;
 }
 .nl-title em { font-family: var(--serif); font-style: italic; color: var(--gold-dark); font-size: 1.08em; }
@@ -1345,7 +1346,7 @@ nav.scrolled::after {
   color: var(--white); padding: 14px 12px; font-weight: 300; border-radius: 8px;
   transition: border-color .3s, background .3s;
 }
-.nl-input::placeholder { color: rgba(245,238,225,0.5); }
+.nl-input::placeholder { color: rgba(243, 160, 6, 0.938); }
 .nl-input:focus { border-color: var(--gold); background: rgba(200,165,90,0.08); }
 .nl-input:-webkit-autofill { background: transparent !important; -webkit-box-shadow: 0 0 0 1000px transparent inset; -webkit-text-fill-color: var(--cream); }
 
@@ -1562,10 +1563,6 @@ html, body { width: 100vw !important; margin: 0 !important; padding: 0 !importan
 @media(max-width: 480px) { nav { width: 100vw !important; padding: 12px 14px !important; margin: 0 !important; } #hero { width: 100vw !important; padding-top: 70px !important; } .nl-title { font-size: clamp(28px, 10vw, 34px) !important; } .nav-logo-h { font-size: 12px !important; } .nav-logo-sub { display: none !important; } .hero-ctas { gap: 12px !important; } #collection, #feature-band, #heritage, #experience, #newsletter, footer { width: 100vw !important; padding-left: 14px !important; padding-right: 14px !important; } }
 @media(max-width: 375px) { nav { width: 100vw !important; padding: 10px 12px !important; } #hero { width: 100vw !important; padding-top: 60px !important; } #collection, #feature-band, #heritage, #experience, #newsletter, footer { width: 100vw !important; padding-left: 12px !important; padding-right: 12px !important; } }
 </style>
-'@
-(Get-Content product.html -Raw) -replace '(?s)<style>.*?</style>',$prodStyle | Set-Content product.html
-"Updated styles"
-
 <body>
 
 <!-- Cursor -->

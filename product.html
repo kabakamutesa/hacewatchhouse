@@ -155,6 +155,16 @@ nav{
 .trust-icon{font-size:18px;margin-bottom:6px}
 .trust-lbl{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 
+/* GALLERY THUMBNAILS */
+.gallery-thumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.gallery-thumb{
+  width:64px;height:64px;border:2px solid transparent;
+  cursor:pointer;overflow:hidden;transition:border-color .2s;
+  border-radius:8px;
+}
+.gallery-thumb:hover,.gallery-thumb.active{border-color:var(--gold)}
+.gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+
 /* LOADING */
 #loading{
   min-height:60vh;display:flex;align-items:center;justify-content:center;
@@ -308,6 +318,7 @@ html, body { width: 100vw !important; margin: 0 !important; padding: 0 !importan
         </div>
         <div class="img-badge" id="img-badge" style="display:none"></div>
       </div>
+      <div class="gallery-thumbs" id="gallery-thumbs"></div>
     </div>
 
     <!-- Info -->
@@ -373,72 +384,107 @@ async function loadProduct() {
   const id = new URLSearchParams(window.location.search).get('id')
   if (!id) { window.location.href = 'index.html'; return }
 
-  const { data, error } = await db.from('products').select('*').eq('id', id).single()
+  const { data: productData, error } = await db.from('products').select('*').eq('id', id).single()
   document.getElementById('loading').style.display = 'none'
 
-  if (!response.ok) {
+  if (error || !productData) {
     document.getElementById('page-content').innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--muted)">Watch not found.</div>'
     document.getElementById('page-content').style.display = 'block'
     return
   }
 
-  const data = await response.json()
-  if (!data) {
-    document.getElementById('page-content').innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--muted)">Watch not found.</div>'
-    document.getElementById('page-content').style.display = 'block'
-    return
-  }
-
-  product = data
+  product = productData
 
   // Update page title
-  document.title = `${data.name} — HACE Watch House`
+  document.title = `${product.name} — HACE Watch House`
 
-  // Populate
-  document.getElementById('p-brand').textContent = data.brand
-  document.getElementById('p-name').textContent  = data.name
-  document.getElementById('p-ref').textContent   = 'Ref. ' + (data.ref_number || '—')
-  document.getElementById('p-price').textContent = 'KES ' + Number(data.price_kes).toLocaleString('en-KE')
-  document.getElementById('p-desc').textContent  = data.description || ''
+  // Populate text fields
+  document.getElementById('p-brand').textContent = product.brand || ''
+  document.getElementById('p-name').textContent  = product.name || ''
+  document.getElementById('p-ref').textContent   = 'Ref. ' + (product.ref_number || '—')
+  document.getElementById('p-price').textContent = 'KES ' + Number(product.price_kes).toLocaleString('en-KE')
+  document.getElementById('p-desc').textContent  = product.description || ''
 
-  // Badge
-  if (data.badge) {
-    const b = document.getElementById('img-badge')
-    b.textContent = data.badge
-    b.style.display = 'block'
+  // Image + gallery thumbnails
+  const imgPanel = document.getElementById('img-panel')
+  const thumbsRow = document.getElementById('gallery-thumbs')
+
+  function setMainImage(url) {
+    imgPanel.innerHTML = `<img src="${url}" alt="${product.name}" style="width:100%;height:100%;object-fit:contain;padding:40px;">`
+    if (product.badge) imgPanel.innerHTML += `<div class="img-badge">${product.badge}</div>`
+    document.querySelectorAll('.gallery-thumb').forEach(t => {
+      t.classList.toggle('active', t.dataset.url === url)
+    })
   }
 
-  // Image
-  if (data.images && data.images.length > 0) {
-    const imgPanel = document.getElementById('img-panel')
-    imgPanel.innerHTML = `<img src="${data.images[0]}" alt="${data.name}">`
-    if (data.badge) imgPanel.innerHTML += `<div class="img-badge">${data.badge}</div>`
+  if (product.images && product.images.length > 0) {
+    setMainImage(product.images[0])
+    if (product.images.length > 1) {
+      product.images.forEach((url, i) => {
+        const thumb = document.createElement('div')
+        thumb.className = 'gallery-thumb' + (i === 0 ? ' active' : '')
+        thumb.dataset.url = url
+        thumb.innerHTML = `<img src="${url}" alt="View ${i+1}">`
+        thumb.onclick = () => setMainImage(url)
+        thumbsRow.appendChild(thumb)
+      })
+    }
+  } else {
+    if (product.badge) {
+      const b = document.getElementById('img-badge')
+      b.textContent = product.badge
+      b.style.display = 'block'
+    }
+  }
+
+  // Sold-out overlay
+  if (product.stock === 0) {
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:absolute;inset:0;background:rgba(26,23,20,0.5);display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,0.8)'
+    overlay.textContent = 'Sold Out'
+    imgPanel.appendChild(overlay)
   }
 
   // Specs
   const specs = [
-    { k: 'Movement',      v: data.movement      },
-    { k: 'Case',          v: data.case_size      },
-    { k: 'Water Resist',  v: data.water_resist   },
-    { k: 'Power Reserve', v: data.power_reserve  },
-    { k: 'Crystal',       v: data.crystal        },
-    { k: 'Complications', v: data.complications  },
+    { k: 'Movement',      v: product.movement      },
+    { k: 'Case Size',     v: product.case_size      },
+    { k: 'Water Resist',  v: product.water_resist   },
+    { k: 'Power Reserve', v: product.power_reserve  },
+    { k: 'Crystal',       v: product.crystal        },
+    { k: 'Complications', v: product.complications  },
   ].filter(s => s.v)
 
-  document.getElementById('p-specs').innerHTML = specs.map(s => `
+  document.getElementById('p-specs').innerHTML = specs.length ? specs.map(s => `
     <div class="spec">
       <div class="spec-k">${s.k}</div>
       <div class="spec-v">${s.v}</div>
     </div>
-  `).join('')
+  `).join('') : '<div class="spec" style="grid-column:1/-1;color:var(--muted);font-size:13px">Specifications on request</div>'
 
   document.getElementById('page-content').style.display = 'block'
 
-  // Button handlers
-  document.getElementById('btn-enquire').onclick = openEq
-  document.getElementById('btn-wa').onclick = () => {
-    const txt = encodeURIComponent(`Hello HACE! I'm interested in the *${data.name}* (Ref. ${data.ref_number}) priced at KES ${Number(data.price_kes).toLocaleString('en-KE')}. Please assist.`)
-    window.open(`https://wa.me/${HACE_WA}?text=${txt}`, '_blank')
+  // CTA buttons — disable if sold out
+  const btnEnquire = document.getElementById('btn-enquire')
+  const btnWa      = document.getElementById('btn-wa')
+
+  if (product.stock === 0) {
+    btnEnquire.disabled = true
+    btnEnquire.style.cssText += ';opacity:.4;cursor:not-allowed'
+    btnEnquire.textContent = 'Currently Sold Out'
+    btnWa.disabled = true
+    btnWa.style.cssText += ';opacity:.4;cursor:not-allowed'
+  } else {
+    btnEnquire.onclick = openEq
+    btnWa.onclick = () => {
+      const txt = encodeURIComponent(
+        `Hello HACE Watch House! 👋\n\n` +
+        `I'm interested in the *${product.name}* (Ref. ${product.ref_number})\n` +
+        `Price: KES ${Number(product.price_kes).toLocaleString('en-KE')}\n\n` +
+        `Please assist. Thank you!`
+      )
+      window.open(`https://wa.me/${HACE_WA}?text=${txt}`, '_blank')
+    }
   }
 }
 
@@ -474,20 +520,18 @@ async function sendEnquiry() {
   document.getElementById('eq-error').style.display = 'none'
   btn.textContent = 'Sending...'
 
-  const response = await fetch('/api/enquiries', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  // Save enquiry to Supabase directly (works without /api endpoints)
+  try {
+    const { data: insData, error: insErr } = await db.from('enquiries').insert({
       name,
       phone,
       message: msg || null,
       product_name: product.name,
       status: 'new'
     })
-  })
-
-  if (!response.ok) {
-    console.error('Enquiry save failed:', await response.text())
+    if (insErr) console.error('Enquiry save failed:', insErr.message)
+  } catch (err) {
+    console.error('Enquiry save failed:', err.message)
   }
 
   const waText = encodeURIComponent(
